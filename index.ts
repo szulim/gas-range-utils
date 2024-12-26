@@ -1,17 +1,20 @@
-type CreateInterface<T extends string[]> = {
-  [K in T[number]]: any;
+type CellValue = GoogleAppsScript.Spreadsheet.ValueType | string;
+
+type RowProperties<T extends string[]> = {
+  [K in T[number]]: CellValue;
 };
 
 function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Range, columnNames: T[] = []) {
   let rangeData: RangeData = {} as RangeData;
-  type RowProperties = Record<(typeof columnNames)[number], string | GoogleAppsScript.Spreadsheet.ValueType>;
+  // type RowProperties = Record<(typeof columnNames)[number], string | GoogleAppsScript.Spreadsheet.ValueType>;
+  type RowProps = RowProperties<typeof columnNames>;
   type SetValuesOptions = {
-    filterRows?: (row: RowProperties) => boolean;
-    setValues: Partial<RowProperties>;
+    filterRows?: (row: RowProps) => boolean;
+    setValues: Partial<RowProps>;
   };
-
+  // rows-as-objects
   interface RangeData {
-    getRowsValues: () => RowProperties[];
+    getRowsValues: () => RowProps[];
     setRowsValues: (setValueOptions: SetValuesOptions) => string | object;
     getRowsRanges?: any;
     addRows?: any;
@@ -20,9 +23,9 @@ function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Ran
 
   rangeData.getRowsValues = () => {
     const rows = range.getValues().map((row) => {
-      let rowObject = {} as RowProperties;
+      let rowObject = {} as RowProps;
       row.map((cell, columnIndex) => {
-        rowObject[columnNames[columnIndex] as keyof RowProperties] = cell;
+        rowObject[columnNames[columnIndex] as keyof RowProps] = cell;
       });
       return rowObject;
     });
