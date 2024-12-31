@@ -4,6 +4,18 @@ type RowProperties<T extends string[]> = {
   [K in T[number]]: CellValue;
 };
 
+function getRowsValues<T extends string>(range: GoogleAppsScript.Spreadsheet.Range, columnNames: T[] = []) {
+  type RowProps = RowProperties<typeof columnNames>;
+  const rows = range.getValues().map((row) => {
+    let rowObject = {} as RowProps;
+    row.map((cell, columnIndex) => {
+      rowObject[columnNames[columnIndex] as keyof RowProps] = cell;
+    });
+    return rowObject;
+  });
+  return rows;
+}
+
 function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Range, columnNames: T[] = []) {
   let rangeData: RangeData = {} as RangeData;
   // type RowProperties = Record<(typeof columnNames)[number], string | GoogleAppsScript.Spreadsheet.ValueType>;
@@ -21,16 +33,7 @@ function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Ran
     removeRows?: any;
   }
 
-  rangeData.getRowsValues = () => {
-    const rows = range.getValues().map((row) => {
-      let rowObject = {} as RowProps;
-      row.map((cell, columnIndex) => {
-        rowObject[columnNames[columnIndex] as keyof RowProps] = cell;
-      });
-      return rowObject;
-    });
-    return rows;
-  };
+  rangeData.getRowsValues = () => getRowsValues(range, columnNames);
 
   // TODO change to single arguments instead of array
   rangeData.setRowsValues = (setValueOptions: SetValuesOptions) => {
@@ -56,8 +59,7 @@ function test() {
   const sheet = spreadsheet.getActiveSheet();
   const range = sheet.getRange('A2:C4');
   const demoRangeData = useRangeUtils(range, ['name', 'type', 'paws']);
-  // console.log(demoRangeData.initial());
-
+  console.log(demoRangeData.getRowsValues());
   demoRangeData.setRowsValues({
     filterRows: (row) => row.name === 'Maciś',
     setValues: {
