@@ -1,32 +1,20 @@
 type CellValue = GoogleAppsScript.Spreadsheet.ValueType | string;
 
-type RowProperties<T extends string[]> = {
+type RowPropertiesConstructor<T extends string[]> = {
   [K in T[number]]: CellValue;
 };
-
-function getRowsValues<T extends string>(range: GoogleAppsScript.Spreadsheet.Range, columnNames: T[] = []) {
-  type RowProps = RowProperties<typeof columnNames>;
-  const rows = range.getValues().map((row) => {
-    let rowObject = {} as RowProps;
-    row.map((cell, columnIndex) => {
-      rowObject[columnNames[columnIndex] as keyof RowProps] = cell;
-    });
-    return rowObject;
-  });
-  return rows;
-}
 
 function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Range, columnNames: T[] = []) {
   let rangeData: RangeData = {} as RangeData;
   // type RowProperties = Record<(typeof columnNames)[number], string | GoogleAppsScript.Spreadsheet.ValueType>;
-  type RowProps = RowProperties<typeof columnNames>;
+  type RowProperties = RowPropertiesConstructor<typeof columnNames>;
   type SetValuesOptions = {
-    filterRows?: (row: RowProps) => boolean;
-    setValues: Partial<RowProps>;
+    filterRows?: (row: RowProperties) => boolean;
+    setValues: Partial<RowProperties>;
   };
   // rows-as-objects
   interface RangeData {
-    getRowsValues: () => RowProps[];
+    getRowsValues: () => RowProperties[];
     setRowsValues: (setValueOptions: SetValuesOptions) => string | object;
     getRowsRanges?: any;
     addRows?: any;
@@ -35,7 +23,6 @@ function useRangeUtils<T extends string>(range: GoogleAppsScript.Spreadsheet.Ran
 
   rangeData.getRowsValues = () => getRowsValues(range, columnNames);
 
-  // TODO change to single arguments instead of array
   rangeData.setRowsValues = (setValueOptions: SetValuesOptions) => {
     const { filterRows, setValues } = setValueOptions;
     const previousRows = rangeData.getRowsValues();
