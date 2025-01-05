@@ -16,7 +16,6 @@ function getRowsRanges<T extends string>(
   const selectPropertiesIndexes = selectProperties
     .map((prop) => startingColumnIndex + columnNames.indexOf(prop))
     .sort((a, b) => a - b);
-  console.log(selectPropertiesIndexes);
 
   let filteredRows: typeof rowsValuesWithIndexes;
 
@@ -39,6 +38,6 @@ function getRowsRanges<T extends string>(
       rangesGroups.push(`R${rowStart}C${columnStart}:R${rowEnd}C${columnEnd}`);
     });
   });
-  console.log(rangesGroups);
+  //TODO: consider between getRangeList() and getRanges(), test for speed. getRanges() has more methods ready
   return range.getSheet().getRangeList(rangesGroups);
 }
