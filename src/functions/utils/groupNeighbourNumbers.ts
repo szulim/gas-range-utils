@@ -1,5 +1,10 @@
+interface group {
+  start?: number;
+  end?: number;
+}
+
 function groupNeighbourNumbers(arrayOfNumbers: number[]) {
-  const result = arrayOfNumbers.reduce((accumulator, current, index) => {
+  const result = arrayOfNumbers.reduce((accumulator: group[], current, index) => {
     const groups = [...accumulator];
 
     if (!groups.length) {
@@ -11,7 +16,7 @@ function groupNeighbourNumbers(arrayOfNumbers: number[]) {
     }
 
     const lastGroup = groups[groups.length - 1];
-    const shouldStartNewGroup = current - lastGroup.end > 1;
+    const shouldStartNewGroup = lastGroup?.end && current - lastGroup.end > 1;
 
     if (shouldStartNewGroup) {
       const newGroup = {

@@ -4,7 +4,7 @@ function getRowsRanges<T extends string>(
   range: GoogleAppsScript.Spreadsheet.Range,
   columnNames: string[]
 ) {
-  const { filterRows, selectProperties } = getRowsRangesOptions;
+  let { filterRows, selectProperties } = getRowsRangesOptions;
 
   const startingRowIndex = range.getRow();
   const startingColumnIndex = range.getColumn();
@@ -13,22 +13,19 @@ function getRowsRanges<T extends string>(
   const rowsValuesWithIndexes = rowsValues.map((row, index) => ({ ...row, _index: startingRowIndex + index }));
 
   //create numbered array of column indexes from selectProperties
+  selectProperties = selectProperties || columnNames;
   const selectPropertiesIndexes = selectProperties
     .map((prop) => startingColumnIndex + columnNames.indexOf(prop))
     .sort((a, b) => a - b);
 
-  let filteredRows: typeof rowsValuesWithIndexes;
-
-  if (filterRows !== undefined) {
-    filteredRows = rowsValuesWithIndexes.filter(filterRows);
-  }
+  const filteredRows = filterRows !== undefined ? rowsValuesWithIndexes.filter(filterRows) : rowsValuesWithIndexes;
 
   const filteredRowsIndexes = filteredRows.map((row) => row._index);
 
   const rowGroups = groupNeighbourNumbers(filteredRowsIndexes);
   const columnGroups = groupNeighbourNumbers(selectPropertiesIndexes);
 
-  const rangesGroups = [];
+  const rangesGroups: string[] = [];
   rowGroups.forEach((rowGroup) => {
     columnGroups.forEach((columnGroup) => {
       const rowStart = rowGroup.start;
